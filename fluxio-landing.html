@@ -1,0 +1,847 @@
+<title>Fluxio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0714;
+    --bg-soft:#0F0B1E;
+    --bg-elevated:#15102A;
+    --surface: rgba(255,255,255,.045);
+    --surface-hover: rgba(255,255,255,.085);
+    --border: rgba(255,255,255,.10);
+    --border-soft: rgba(255,255,255,.06);
+    --text:#F5F3FC;
+    --text-muted:#B3ACCB;
+    --text-faint:#726C8C;
+    --violet:#8B6BFF;
+    --violet-soft: rgba(139,107,255,.16);
+    --cyan:#34E8CE;
+    --cyan-soft: rgba(52,232,206,.16);
+    --warm:#FF9F5A;
+    --warm-soft: rgba(255,159,90,.16);
+    --success:#4ADE80;
+    --warning:#FBBF24;
+    --danger:#F76B6B;
+    --gradient-brand: linear-gradient(90deg, var(--violet), var(--cyan));
+    --font-display:'Bricolage Grotesque', 'Segoe UI', sans-serif;
+    --font-body:'Plus Jakarta Sans', 'Segoe UI', sans-serif;
+    --font-mono:'JetBrains Mono', 'SF Mono', monospace;
+    --radius-sm:10px;
+    --radius-md:16px;
+    --radius-lg:24px;
+    --radius-full:999px;
+    --shadow-card: 0 24px 60px -24px rgba(0,0,0,.65);
+    --shadow-glow: 0 0 80px -20px rgba(139,107,255,.45);
+    color-scheme: dark;
+  }
+
+  *,*::before,*::after{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--font-body);
+    font-size:16px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+    position:relative;
+  }
+
+  /* ambient background */
+  body::before{
+    content:"";
+    position:fixed; inset:0; z-index:-2;
+    background:
+      radial-gradient(60vw 60vw at 85% -10%, rgba(139,107,255,.20), transparent 60%),
+      radial-gradient(50vw 50vw at 0% 30%, rgba(52,232,206,.14), transparent 60%),
+      radial-gradient(40vw 40vw at 60% 90%, rgba(255,159,90,.08), transparent 60%),
+      var(--bg);
+  }
+  body::after{
+    content:"";
+    position:fixed; inset:0; z-index:-1;
+    background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,.05) 1px, transparent 0);
+    background-size: 30px 30px;
+    mask-image: radial-gradient(80% 60% at 50% 0%, black, transparent 90%);
+  }
+
+  h1,h2,h3,h4{ font-family:var(--font-display); font-weight:600; margin:0; text-wrap:balance; letter-spacing:-0.01em; }
+  p{ margin:0; }
+  a{ color:inherit; text-decoration:none; }
+  ul{ margin:0; padding:0; list-style:none; }
+  button{ font-family:inherit; cursor:pointer; }
+  img,svg{ display:block; max-width:100%; }
+  ::selection{ background:var(--violet); color:#fff; }
+  :focus-visible{ outline:2px solid var(--cyan); outline-offset:3px; border-radius:4px; }
+  .mono{ font-family:var(--font-mono); font-variant-numeric:tabular-nums; }
+  .sr-only{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+
+  .skip-link{
+    position:absolute; left:1rem; top:-100px; background:var(--violet); color:#fff;
+    padding:.6rem 1rem; border-radius:var(--radius-sm); z-index:200; transition:top .2s;
+    font-weight:600; font-size:.9rem;
+  }
+  .skip-link:focus{ top:1rem; }
+
+  .container{ max-width:1180px; margin-inline:auto; padding-inline:clamp(1.25rem,4vw,2.5rem); }
+  .section{ padding-block:clamp(3.5rem,8vw,6.5rem); }
+  .section-head{ max-width:640px; margin-bottom:clamp(2rem,5vw,3rem); }
+  .section-head.center{ margin-inline:auto; text-align:center; }
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:.5rem;
+    font-family:var(--font-mono); font-size:.72rem; font-weight:500; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--cyan); margin-bottom:1rem;
+  }
+  .eyebrow .dot{ width:6px; height:6px; border-radius:50%; background:var(--warm); box-shadow:0 0 12px var(--warm); }
+  .section-head h2{ font-size:clamp(1.8rem,3.2vw,2.6rem); margin-bottom:.85rem; }
+  .section-head p{ color:var(--text-muted); font-size:1.05rem; }
+
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:.5rem;
+    padding:.85rem 1.5rem; border-radius:var(--radius-full); font-weight:600; font-size:.95rem;
+    border:1px solid transparent; transition:transform .15s ease, box-shadow .15s ease, background .15s ease, border-color .15s ease;
+    white-space:nowrap;
+  }
+  .btn-primary{ background:var(--gradient-brand); color:#0A0714; box-shadow:0 10px 30px -10px rgba(139,107,255,.55); }
+  .btn-primary:hover{ transform:translateY(-2px); box-shadow:0 16px 36px -12px rgba(139,107,255,.7); }
+  .btn-ghost{ background:var(--surface); border-color:var(--border); color:var(--text); }
+  .btn-ghost:hover{ background:var(--surface-hover); border-color:var(--border-soft); }
+  .btn-small{ padding:.5rem .95rem; font-size:.8rem; border-radius:var(--radius-full); }
+  .btn svg{ width:16px; height:16px; }
+
+  /* ---------- NAV ---------- */
+  .navbar{
+    position:sticky; top:0; z-index:100;
+    background:rgba(10,7,20,.65); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
+    border-bottom:1px solid var(--border-soft);
+  }
+  .nav-inner{ display:flex; align-items:center; justify-content:space-between; padding-block:1rem; }
+  .brand{ display:flex; align-items:center; gap:.6rem; font-family:var(--font-display); font-weight:700; font-size:1.15rem; }
+  .brand svg{ width:30px; height:30px; }
+  .nav-links{ display:flex; align-items:center; gap:2rem; }
+  .nav-links a{ font-size:.92rem; color:var(--text-muted); transition:color .15s; }
+  .nav-links a:hover{ color:var(--text); }
+  .nav-actions{ display:flex; align-items:center; gap:.75rem; }
+  .nav-toggle{ display:none; background:none; border:1px solid var(--border); border-radius:var(--radius-sm); padding:.5rem; color:var(--text); }
+  .nav-toggle svg{ width:20px; height:20px; }
+
+  .mobile-menu{
+    display:none; flex-direction:column; gap:1.25rem; padding:1.5rem clamp(1.25rem,4vw,2.5rem) 2rem;
+    border-bottom:1px solid var(--border-soft); background:var(--bg-soft);
+  }
+  .mobile-menu a{ font-size:1rem; color:var(--text-muted); }
+  .mobile-menu.open{ display:flex; }
+
+  /* ---------- HERO ---------- */
+  .hero{ padding-block:clamp(3rem,8vw,5.5rem) clamp(2rem,6vw,4rem); }
+  .hero-grid{ display:grid; grid-template-columns:1.05fr .95fr; gap:clamp(2rem,5vw,4rem); align-items:center; }
+  .hero-title{ font-size:clamp(2.3rem,4.6vw,3.6rem); line-height:1.08; margin-bottom:1.25rem; }
+  .hero-title .grad{ background:var(--gradient-brand); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .hero-sub{ font-size:1.1rem; color:var(--text-muted); max-width:46ch; margin-bottom:1.75rem; }
+  .hero-actions{ display:flex; flex-wrap:wrap; gap:.9rem; margin-bottom:2rem; }
+  .hero-stats{ display:flex; flex-wrap:wrap; gap:.6rem; }
+  .stat-chip{
+    display:flex; align-items:center; gap:.5rem; background:var(--surface); border:1px solid var(--border);
+    padding:.5rem .9rem; border-radius:var(--radius-full); font-size:.8rem; color:var(--text-muted);
+  }
+  .stat-chip .mono{ color:var(--text); font-weight:600; }
+
+  .hero-visual{ position:relative; min-height:420px; }
+  .glass-card{
+    background:linear-gradient(160deg, rgba(255,255,255,.07), rgba(255,255,255,.02));
+    border:1px solid var(--border); border-radius:var(--radius-lg);
+    backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+    box-shadow:var(--shadow-card);
+  }
+  .panorama-card{
+    position:relative; z-index:2; padding:1.5rem; width:min(420px,100%); margin-inline:auto;
+  }
+  .panorama-card h4{ font-size:1rem; margin-bottom:1rem; display:flex; align-items:center; justify-content:space-between; }
+  .panorama-card h4 span.live{ font-family:var(--font-mono); font-size:.68rem; color:var(--success); display:flex; align-items:center; gap:.4rem; text-transform:uppercase; letter-spacing:.08em; }
+  .panorama-card h4 span.live::before{ content:""; width:6px; height:6px; border-radius:50%; background:var(--success); box-shadow:0 0 10px var(--success); }
+  .panorama-row{ display:flex; align-items:flex-start; gap:.75rem; padding-block:.7rem; border-top:1px solid var(--border-soft); }
+  .panorama-row:first-of-type{ border-top:none; }
+  .panorama-icon{ width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .panorama-icon svg{ width:17px; height:17px; }
+  .panorama-icon.violet{ background:var(--violet-soft); color:var(--violet); }
+  .panorama-icon.cyan{ background:var(--cyan-soft); color:var(--cyan); }
+  .panorama-icon.warm{ background:var(--warm-soft); color:var(--warm); }
+  .panorama-text b{ display:block; font-size:.87rem; font-weight:600; margin-bottom:.15rem; }
+  .panorama-text span{ font-size:.78rem; color:var(--text-faint); }
+
+  .float-card{ position:absolute; z-index:1; padding:1rem 1.1rem; }
+  .float-card.mentions{ top:-8%; left:-10%; width:220px; transform:rotate(-6deg); }
+  .float-card.mentions .src{ display:inline-flex; align-items:center; gap:.4rem; font-family:var(--font-mono); font-size:.65rem; letter-spacing:.06em; color:var(--text-faint); text-transform:uppercase; margin-bottom:.5rem; }
+  .float-card.mentions .badge-ig{ background:var(--warm-soft); color:var(--warm); padding:.15rem .4rem; border-radius:5px; font-weight:600; }
+  .float-card.mentions p{ font-size:.82rem; color:var(--text-muted); line-height:1.4; }
+  .float-card.chart{ bottom:-10%; right:-8%; width:200px; transform:rotate(5deg); }
+  .float-card.chart .bars{ display:flex; align-items:flex-end; gap:.35rem; height:60px; margin-top:.6rem; }
+  .float-card.chart .bars span{ flex:1; border-radius:4px 4px 0 0; background:var(--gradient-brand); opacity:.85; }
+  .float-card.chart small{ font-size:.72rem; color:var(--text-faint); }
+
+  @media (prefers-reduced-motion:no-preference){
+    .float-card.mentions{ animation:drift1 7s ease-in-out infinite; }
+    .float-card.chart{ animation:drift2 8s ease-in-out infinite; }
+  }
+  @keyframes drift1{ 0%,100%{ transform:rotate(-6deg) translateY(0);} 50%{ transform:rotate(-4deg) translateY(-10px);} }
+  @keyframes drift2{ 0%,100%{ transform:rotate(5deg) translateY(0);} 50%{ transform:rotate(7deg) translateY(8px);} }
+
+  /* ---------- HOW IT WORKS ---------- */
+  .flow{ position:relative; display:flex; flex-direction:column; gap:0; }
+  .flow-step{ position:relative; display:grid; grid-template-columns:64px 1fr; gap:1.5rem; padding-block:1.5rem; }
+  .flow-step::before{
+    content:""; position:absolute; left:31px; top:0; bottom:0; width:2px;
+    background:linear-gradient(var(--border), var(--border));
+  }
+  .flow-step:first-child::before{ top:50%; }
+  .flow-step:last-child::before{ bottom:50%; }
+  .flow-node{
+    position:relative; z-index:1; width:64px; height:64px; border-radius:50%;
+    background:var(--bg-elevated); border:1px solid var(--border); display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-mono); font-weight:600; color:var(--cyan); font-size:1rem;
+  }
+  .flow-content h3{ font-size:1.2rem; margin-bottom:.4rem; }
+  .flow-content p{ color:var(--text-muted); max-width:60ch; }
+
+  /* ---------- BENTO ---------- */
+  .bento{ display:grid; grid-template-columns:repeat(4,1fr); gap:1.25rem; }
+  .tile{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg);
+    padding:1.75rem; display:flex; flex-direction:column; gap:.9rem; transition:border-color .15s, background .15s, transform .15s;
+  }
+  .tile:hover{ border-color:var(--border-soft); background:var(--surface-hover); transform:translateY(-3px); }
+  .tile-large{ grid-column:span 2; }
+  .tile-spotlight{ grid-column:1 / -1; display:grid; grid-template-columns:1.1fr .9fr; gap:2rem; align-items:center; }
+  .tile-icon{ width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; background:var(--violet-soft); color:var(--violet); }
+  .tile-icon svg{ width:22px; height:22px; }
+  .tile h3{ font-size:1.15rem; }
+  .tile p.desc{ color:var(--text-muted); font-size:.92rem; }
+  .tile-list{ display:flex; flex-direction:column; gap:.55rem; }
+  .tile-list li{ display:flex; gap:.6rem; align-items:flex-start; font-size:.9rem; color:var(--text-muted); }
+  .tile-list svg{ width:16px; height:16px; flex-shrink:0; margin-top:.15rem; color:var(--cyan); }
+
+  .bento-small{ display:grid; grid-template-columns:repeat(3,1fr); gap:1.25rem; margin-top:1.25rem; }
+
+  .signal-feed{ display:flex; flex-direction:column; gap:.75rem; }
+  .signal-row{ display:flex; align-items:center; gap:.75rem; background:var(--bg-elevated); border:1px solid var(--border-soft); border-radius:var(--radius-sm); padding:.75rem .9rem; }
+  .signal-badge{ font-family:var(--font-mono); font-size:.65rem; font-weight:700; padding:.3rem .45rem; border-radius:6px; flex-shrink:0; }
+  .signal-badge.ig{ background:var(--warm-soft); color:var(--warm); }
+  .signal-badge.li{ background:var(--cyan-soft); color:var(--cyan); }
+  .signal-row p{ font-size:.83rem; color:var(--text-muted); flex:1; }
+  .signal-row .btn-small{ flex-shrink:0; }
+
+  /* ---------- DASHBOARD PREVIEW ---------- */
+  .app-shell{ display:grid; grid-template-columns:220px 1fr; border-radius:var(--radius-lg); overflow:hidden; border:1px solid var(--border); background:var(--bg-elevated); box-shadow:var(--shadow-card); }
+  .app-sidebar{ background:rgba(255,255,255,.025); border-right:1px solid var(--border-soft); padding:1.5rem 1rem; display:flex; flex-direction:column; gap:.25rem; }
+  .app-sidebar .brand{ margin-bottom:1.5rem; padding-inline:.5rem; font-size:1rem; }
+  .app-sidebar .brand svg{ width:24px; height:24px; }
+  .side-link{ display:flex; align-items:center; gap:.7rem; padding:.65rem .75rem; border-radius:var(--radius-sm); font-size:.87rem; color:var(--text-muted); }
+  .side-link svg{ width:17px; height:17px; }
+  .side-link.active{ background:var(--violet-soft); color:var(--text); border-left:2px solid var(--violet); }
+  .app-main{ display:flex; flex-direction:column; min-width:0; }
+  .app-topbar{ display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:1rem 1.5rem; border-bottom:1px solid var(--border-soft); }
+  .app-search{ display:flex; align-items:center; gap:.6rem; background:var(--surface); border:1px solid var(--border-soft); border-radius:var(--radius-full); padding:.5rem 1rem; color:var(--text-faint); font-size:.85rem; flex:1; max-width:320px; }
+  .app-search svg{ width:15px; height:15px; }
+  .app-user{ display:flex; align-items:center; gap:.65rem; }
+  .app-bell{ position:relative; width:34px; height:34px; border-radius:50%; background:var(--surface); border:1px solid var(--border-soft); display:flex; align-items:center; justify-content:center; }
+  .app-bell svg{ width:16px; height:16px; }
+  .app-bell .badge{ position:absolute; top:-4px; right:-4px; background:var(--warm); color:#221200; font-size:.6rem; font-weight:700; border-radius:50%; width:16px; height:16px; display:flex; align-items:center; justify-content:center; }
+  .avatar{ width:34px; height:34px; border-radius:50%; background:var(--gradient-brand); display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-weight:700; font-size:.75rem; color:#0A0714; }
+  .app-user span{ font-size:.83rem; color:var(--text-muted); }
+  .app-body{ display:grid; grid-template-columns:1fr 300px; gap:1.5rem; padding:1.5rem; }
+
+  .kanban-board{ display:grid; grid-auto-flow:column; grid-auto-columns:220px; gap:1rem; overflow-x:auto; padding-bottom:.5rem; }
+  .kanban-col{ display:flex; flex-direction:column; gap:.75rem; }
+  .kanban-col-head{ display:flex; align-items:center; justify-content:space-between; font-size:.8rem; color:var(--text-faint); text-transform:uppercase; letter-spacing:.06em; padding-inline:.15rem; }
+  .kanban-col-head .count{ font-family:var(--font-mono); background:var(--surface); border-radius:var(--radius-full); padding:.05rem .5rem; font-size:.72rem; }
+  .proj-card{ background:var(--surface); border:1px solid var(--border-soft); border-radius:var(--radius-sm); padding:.85rem; display:flex; flex-direction:column; gap:.6rem; }
+  .proj-card b{ font-size:.85rem; line-height:1.3; }
+  .proj-card .client{ font-size:.75rem; color:var(--text-faint); }
+  .progress{ height:4px; border-radius:999px; background:rgba(255,255,255,.08); overflow:hidden; }
+  .progress span{ display:block; height:100%; background:var(--gradient-brand); }
+  .proj-meta{ display:flex; align-items:center; justify-content:space-between; }
+  .tag{ font-size:.65rem; font-family:var(--font-mono); padding:.15rem .45rem; border-radius:5px; background:var(--border-soft); color:var(--text-muted); }
+  .proj-avatar{ width:20px; height:20px; border-radius:50%; background:var(--cyan-soft); color:var(--cyan); display:flex; align-items:center; justify-content:center; font-size:.6rem; font-weight:700; font-family:var(--font-mono); }
+
+  .app-side-widgets{ display:flex; flex-direction:column; gap:1.25rem; min-width:0; }
+  .widget{ background:var(--surface); border:1px solid var(--border-soft); border-radius:var(--radius-md); padding:1.1rem; display:flex; flex-direction:column; gap:.85rem; }
+  .widget-head{ display:flex; align-items:center; justify-content:space-between; }
+  .widget-head h4{ font-size:.85rem; }
+  .widget-head a{ font-size:.72rem; color:var(--cyan); }
+  .funnel-row{ display:flex; align-items:center; gap:.6rem; font-size:.75rem; }
+  .funnel-row .label{ width:96px; flex-shrink:0; color:var(--text-muted); }
+  .funnel-track{ flex:1; height:6px; border-radius:999px; background:rgba(255,255,255,.06); overflow:hidden; }
+  .funnel-track span{ display:block; height:100%; background:var(--gradient-brand); }
+  .funnel-row .count{ width:18px; text-align:right; color:var(--text-faint); }
+  .lead-highlight{ background:var(--bg-elevated); border:1px solid var(--border-soft); border-radius:var(--radius-sm); padding:.75rem; display:flex; flex-direction:column; gap:.35rem; }
+  .lead-highlight .top{ display:flex; justify-content:space-between; align-items:center; }
+  .lead-highlight b{ font-size:.82rem; }
+  .lead-highlight .value{ font-family:var(--font-mono); color:var(--success); font-size:.8rem; }
+  .lead-highlight span{ font-size:.72rem; color:var(--text-faint); }
+
+  /* ---------- PRICING ---------- */
+  .pricing-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:1.5rem; align-items:stretch; }
+  .price-card{ position:relative; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:2rem; display:flex; flex-direction:column; gap:1.5rem; }
+  .price-card.featured{ border-color:transparent; background:linear-gradient(var(--bg-elevated), var(--bg-elevated)) padding-box, var(--gradient-brand) border-box; border:1px solid transparent; box-shadow:var(--shadow-glow); }
+  .price-badge{ position:absolute; top:-13px; left:2rem; background:var(--gradient-brand); color:#0A0714; font-size:.7rem; font-weight:700; padding:.3rem .75rem; border-radius:var(--radius-full); }
+  .price-card h3{ font-size:1.2rem; }
+  .price-card .who{ font-size:.85rem; color:var(--text-faint); }
+  .price-amount{ display:flex; align-items:baseline; gap:.35rem; }
+  .price-amount .num{ font-size:2.4rem; font-family:var(--font-mono); font-weight:600; }
+  .price-amount .per{ color:var(--text-faint); font-size:.85rem; }
+  .price-card .tile-list li{ color:var(--text-muted); }
+  .price-card .tile-list svg{ color:var(--violet); }
+
+  /* ---------- FINAL CTA ---------- */
+  .final-cta{
+    background:linear-gradient(135deg, rgba(139,107,255,.14), rgba(52,232,206,.10));
+    border:1px solid var(--border); border-radius:var(--radius-lg);
+    padding:clamp(2.5rem,6vw,4rem); text-align:center; display:flex; flex-direction:column; align-items:center; gap:1.5rem;
+  }
+  .final-cta h2{ font-size:clamp(1.7rem,3.5vw,2.4rem); max-width:20ch; }
+  .final-cta p{ color:var(--text-muted); max-width:48ch; }
+
+  /* ---------- FOOTER ---------- */
+  footer{ border-top:1px solid var(--border-soft); padding-block:3rem 2rem; }
+  .footer-grid{ display:grid; grid-template-columns:1.4fr repeat(4,1fr); gap:2rem; margin-bottom:2.5rem; }
+  .footer-brand p{ color:var(--text-faint); font-size:.88rem; margin-top:.85rem; max-width:32ch; }
+  .footer-col h5{ font-family:var(--font-body); font-size:.78rem; text-transform:uppercase; letter-spacing:.08em; color:var(--text-faint); margin-bottom:.9rem; font-weight:600; }
+  .footer-col ul{ display:flex; flex-direction:column; gap:.65rem; }
+  .footer-col a{ font-size:.88rem; color:var(--text-muted); }
+  .footer-col a:hover{ color:var(--text); }
+  .footer-bottom{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; padding-top:2rem; border-top:1px solid var(--border-soft); }
+  .footer-bottom p{ font-size:.82rem; color:var(--text-faint); }
+  .social-badges{ display:flex; gap:.6rem; }
+  .social-badges a{ width:32px; height:32px; border-radius:50%; background:var(--surface); border:1px solid var(--border-soft); display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-size:.65rem; font-weight:700; color:var(--text-muted); }
+  .social-badges a:hover{ color:var(--text); border-color:var(--border); }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width:980px){
+    .hero-grid{ grid-template-columns:1fr; }
+    .hero-visual{ min-height:340px; order:-1; }
+    .app-body{ grid-template-columns:1fr; }
+    .footer-grid{ grid-template-columns:repeat(3,1fr); }
+    .bento-small{ grid-template-columns:repeat(2,1fr); }
+  }
+  @media (max-width:860px){
+    .nav-links{ display:none; }
+    .nav-toggle{ display:inline-flex; }
+  }
+  @media (max-width:760px){
+    .bento{ grid-template-columns:repeat(2,1fr); }
+    .tile-large{ grid-column:span 2; }
+    .tile-spotlight{ grid-template-columns:1fr; }
+    .app-shell{ grid-template-columns:1fr; }
+    .app-sidebar{ display:none; }
+    .pricing-grid{ grid-template-columns:1fr; }
+    .footer-grid{ grid-template-columns:repeat(2,1fr); }
+  }
+  @media (max-width:540px){
+    .bento{ grid-template-columns:1fr; }
+    .tile-large{ grid-column:span 1; }
+    .bento-small{ grid-template-columns:1fr; }
+    .footer-grid{ grid-template-columns:1fr 1fr; }
+    .flow-step{ grid-template-columns:48px 1fr; gap:1rem; }
+    .flow-node{ width:48px; height:48px; font-size:.85rem; }
+    .flow-step::before{ left:23px; }
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    *{ animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; }
+  }
+</style>
+
+<a class="skip-link" href="#contenido">Saltar al contenido</a>
+
+<header class="navbar">
+  <div class="container nav-inner">
+    <a class="brand" href="#top">
+      <svg viewBox="0 0 32 32" fill="none"><defs><linearGradient id="lg1" x1="0" y1="0" x2="32" y2="0"><stop offset="0" stop-color="#8B6BFF"/><stop offset="1" stop-color="#34E8CE"/></linearGradient></defs><path d="M4 22C4 22 9 10 16 10C23 10 23 22 28 22" stroke="url(#lg1)" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="28" cy="22" r="2.8" fill="url(#lg1)"/></svg>
+      Fluxio
+    </a>
+    <nav class="nav-links">
+      <a href="#flujo">Cómo funciona</a>
+      <a href="#producto">Producto</a>
+      <a href="#panel">Panel</a>
+      <a href="#precios">Precios</a>
+    </nav>
+    <div class="nav-actions">
+      <a class="btn btn-ghost btn-small" href="#precios">Iniciar sesión</a>
+      <a class="btn btn-primary btn-small" href="#precios">Prueba gratis</a>
+      <button class="nav-toggle" id="navToggle" aria-label="Abrir menú" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="#flujo">Cómo funciona</a>
+    <a href="#producto">Producto</a>
+    <a href="#panel">Panel</a>
+    <a href="#precios">Precios</a>
+    <a class="btn btn-primary" href="#precios">Prueba gratis 14 días</a>
+  </div>
+</header>
+
+<main id="contenido">
+
+  <!-- HERO -->
+  <section class="hero" id="top">
+    <div class="container hero-grid">
+      <div class="hero-copy">
+        <span class="eyebrow"><span class="dot"></span>Organizador de proyectos + CRM · Estudios y equipos independientes</span>
+        <h1 class="hero-title">De una mención en redes a un <span class="grad">proyecto entregado.</span></h1>
+        <p class="hero-sub">Fluxio escucha las redes sociales de cada proyecto, convierte las señales en leads, los organiza en tu CRM y lleva a cada cliente de la propuesta a la entrega — todo desde un mismo panel.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#precios">Empezar prueba gratis</a>
+          <a class="btn btn-ghost" href="#panel">Ver el panel en acción
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+        </div>
+        <div class="hero-stats">
+          <span class="stat-chip"><span class="mono">6</span> redes sociales por proyecto</span>
+          <span class="stat-chip"><span class="mono">1</span> pipeline para leads y clientes</span>
+          <span class="stat-chip"><span class="mono">0</span> hojas de cálculo perdidas</span>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <div class="glass-card float-card mentions">
+          <span class="src"><span class="badge-ig">IG</span> hace 2 min</span>
+          <p>"Necesitamos rediseñar la marca antes de fin de año…"</p>
+        </div>
+        <div class="glass-card panorama-card">
+          <h4>Panorama de hoy <span class="live">En vivo</span></h4>
+          <div class="panorama-row">
+            <div class="panorama-icon warm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 3 7 21M17 3l-2 18M4 9h17M3 15h17"/></svg></div>
+            <div class="panorama-text"><b>Nuevo lead detectado</b><span>LinkedIn · Nimbus Analytics busca agencia UX</span></div>
+          </div>
+          <div class="panorama-row">
+            <div class="panorama-icon violet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></div>
+            <div class="panorama-text"><b>Proyecto actualizado</b><span>App de reservas · Vento Fitness pasó a Revisión</span></div>
+          </div>
+          <div class="panorama-row">
+            <div class="panorama-icon cyan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/></svg></div>
+            <div class="panorama-text"><b>Pago recibido</b><span>Rebranding · Sal y Menta — factura #0142</span></div>
+          </div>
+        </div>
+        <div class="glass-card float-card chart">
+          <small>Ingresos por semana</small>
+          <div class="bars">
+            <span style="height:35%"></span><span style="height:55%"></span><span style="height:40%"></span>
+            <span style="height:70%"></span><span style="height:60%"></span><span style="height:90%"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="section" id="flujo">
+    <div class="container">
+      <div class="section-head center">
+        <span class="eyebrow"><span class="dot"></span>El recorrido de un cliente</span>
+        <h2>Un flujo continuo, de la señal al cierre</h2>
+        <p>Cinco pasos que normalmente viven en cinco apps distintas — aquí conectados en uno solo.</p>
+      </div>
+      <div class="flow">
+        <div class="flow-step">
+          <div class="flow-node">01</div>
+          <div class="flow-content">
+            <h3>Escuchar</h3>
+            <p>Conecta Instagram, LinkedIn, X, TikTok y Threads a cada proyecto o nicho. Fluxio rastrea menciones, hashtags y publicaciones relevantes de forma continua.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-node">02</div>
+          <div class="flow-content">
+            <h3>Detectar</h3>
+            <p>Cada señal social se analiza y se puntúa según intención de compra, sentimiento y relevancia para el nicho del proyecto — sin revisar el feed a mano.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-node">03</div>
+          <div class="flow-content">
+            <h3>Cultivar</h3>
+            <p>Un clic convierte la señal en lead dentro del CRM, con todo el contexto: red de origen, contenido con el que interactuó y primer mensaje sugerido.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-node">04</div>
+          <div class="flow-content">
+            <h3>Convertir</h3>
+            <p>Propuesta, contrato y firma electrónica sin cambiar de herramienta. En cuanto se firma, el lead se convierte en cliente y en proyecto activo.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-node">05</div>
+          <div class="flow-content">
+            <h3>Entregar</h3>
+            <p>Tableros, estados y checkpoints compartidos con el cliente llevan el proyecto de Backlog a Entregado, con horas y rentabilidad registradas al día.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BENTO FEATURES -->
+  <section class="section" id="producto">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow"><span class="dot"></span>Todo el estudio, un panel</span>
+        <h2>Cada pieza que hoy vive dispersa en distintas apps</h2>
+        <p>CRM, proyectos, leads y redes sociales, pensados para trabajar juntos en vez de exportarse entre sí.</p>
+      </div>
+
+      <div class="bento">
+        <div class="tile tile-large">
+          <div class="tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="8" r="3"/><path d="M2 20c0-3.5 3-6 7-6s7 2.5 7 6"/><circle cx="17" cy="9" r="2.5"/><path d="M22 20c0-2.8-1.8-5-4.5-5.7"/></svg></div>
+          <h3>CRM de clientes</h3>
+          <p class="desc">Cada cliente, con contexto completo.</p>
+          <ul class="tile-list">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12l5 5L20 6"/></svg>Ficha 360° con historial de interacciones, contratos y archivos</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12l5 5L20 6"/></svg>Valor de cuenta (LTV) y salud de la relación en tiempo real</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12l5 5L20 6"/></svg>Notas internas y menciones para todo el equipo</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12l5 5L20 6"/></svg>Segmentación por industria, etapa o gestor de cuenta</li>
+          </ul>
+        </div>
+
+        <div class="tile tile-large">
+          <div class="tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></div>
+          <h3>Gestión de proyectos</h3>
+          <p class="desc">Cada proyecto, siempre visible.</p>
+          <ul class="tile-list">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12l5 5L20 6"/></svg>Tableros Kanban personalizables por equipo o cliente</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12l5 5L20 6"/></svg>Estados configurables: Backlog, En curso, Revisión, Bloqueado, Entregado</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12l5 5L20 6"/></svg>Dependencias entre tareas y línea de tiempo tipo Gantt</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12l5 5L20 6"/></svg>Checkpoints compartidos con el cliente para aprobar avances</li>
+          </ul>
+        </div>
+
+        <div class="tile tile-spotlight">
+          <div>
+            <div class="tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 3 7 21M17 3l-2 18M4 9h17M3 15h17"/></svg></div>
+            <h3 style="margin-top:.9rem;">Social listening por proyecto</h3>
+            <p class="desc" style="margin-top:.5rem;">Investiga redes sociales antes de que el cliente te escriba. Conecta Instagram, LinkedIn, X, TikTok y Threads a cada proyecto o nicho: Fluxio rastrea menciones y publicaciones relevantes, mide el sentimiento y avisa cuando detecta intención de compra.</p>
+          </div>
+          <div class="signal-feed">
+            <div class="signal-row">
+              <span class="signal-badge ig">IG</span>
+              <p>@andinacoffee: "necesitamos un rediseño de marca" · Sentimiento positivo</p>
+              <button class="btn btn-ghost btn-small">Convertir a lead</button>
+            </div>
+            <div class="signal-row">
+              <span class="signal-badge li">LI</span>
+              <p>Nimbus Analytics publicó que busca "agencia de diseño UX" · Alta intención</p>
+              <button class="btn btn-ghost btn-small">Convertir a lead</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bento-small">
+        <div class="tile">
+          <div class="tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/></svg></div>
+          <h3>Leads y pipeline</h3>
+          <p class="desc">Pipeline visual de Prospección a Ganado, con lead scoring automático según el origen y la interacción de cada señal social.</p>
+        </div>
+        <div class="tile">
+          <div class="tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 2 3 7v6c0 5 4 8.5 9 9 5-.5 9-4 9-9V7z"/></svg></div>
+          <h3>Automatizaciones con IA</h3>
+          <p class="desc">Resúmenes de reuniones, sugerencias de siguiente paso y borradores de propuesta generados a partir del brief de cada cliente.</p>
+        </div>
+        <div class="tile">
+          <div class="tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v0M8 13h8M8 17h5"/></svg></div>
+          <h3>Facturación y contratos</h3>
+          <p class="desc">Propuestas con firma electrónica, facturas recurrentes y seguimiento de pagos sin salir del proyecto.</p>
+        </div>
+        <div class="tile">
+          <div class="tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg></div>
+          <h3>Registro de horas</h3>
+          <p class="desc">Time tracking por tarea y por cliente, con reportes de rentabilidad real de cada proyecto.</p>
+        </div>
+        <div class="tile">
+          <div class="tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="8" cy="8" r="3"/><circle cx="17" cy="8" r="3"/><path d="M2 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5M13.5 14.7c2.8.3 4.5 2.3 4.5 5.3"/></svg></div>
+          <h3>Colaboración en equipo</h3>
+          <p class="desc">Roles y permisos por proyecto, comentarios internos y menciones para mantener a todo el estudio alineado.</p>
+        </div>
+        <div class="tile">
+          <div class="tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></div>
+          <h3>Integraciones abiertas</h3>
+          <p class="desc">Conecta Slack, Notion y Google Workspace, o construye las tuyas con la API abierta de Fluxio.</p>
+        </div>
+        <div class="tile">
+          <div class="tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 20V10M12 20V4M20 20v-7"/></svg></div>
+          <h3>Analíticas y reportes</h3>
+          <p class="desc">Paneles personalizables de salud de proyectos, forecast de ingresos y conversión de leads por canal.</p>
+        </div>
+        <div class="tile">
+          <div class="tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/></svg></div>
+          <h3>Seguridad y permisos</h3>
+          <p class="desc">Permisos granulares por rol, registro de auditoría y cumplimiento con estándares de protección de datos.</p>
+        </div>
+        <div class="tile">
+          <div class="tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/></svg></div>
+          <h3>App móvil / PWA</h3>
+          <p class="desc">Panel completo desde cualquier dispositivo, con notificaciones push para leads y aprobaciones de clientes.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DASHBOARD PREVIEW -->
+  <section class="section" id="panel">
+    <div class="container">
+      <div class="section-head center">
+        <span class="eyebrow"><span class="dot"></span>Vista previa</span>
+        <h2>Así se ve Fluxio por dentro</h2>
+        <p>Un panel real: tus proyectos, tu CRM y tus señales sociales, en la misma pantalla. Datos de ejemplo.</p>
+      </div>
+
+      <div class="app-shell">
+        <aside class="app-sidebar">
+          <div class="brand">
+            <svg viewBox="0 0 32 32" fill="none"><path d="M4 22C4 22 9 10 16 10C23 10 23 22 28 22" stroke="url(#lg1)" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="28" cy="22" r="2.8" fill="#34E8CE"/></svg>
+            Fluxio
+          </div>
+          <a class="side-link" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>Inicio</a>
+          <a class="side-link active" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Proyectos</a>
+          <a class="side-link" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="8" r="3"/><path d="M2 20c0-3.5 3-6 7-6s7 2.5 7 6"/><circle cx="17" cy="9" r="2.5"/><path d="M22 20c0-2.8-1.8-5-4.5-5.7"/></svg>CRM</a>
+          <a class="side-link" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/></svg>Leads</a>
+          <a class="side-link" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 3 7 21M17 3l-2 18M4 9h17M3 15h17"/></svg>Social listening</a>
+          <a class="side-link" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 20V10M12 20V4M20 20v-7"/></svg>Reportes</a>
+          <a class="side-link" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>Ajustes</a>
+        </aside>
+
+        <div class="app-main">
+          <div class="app-topbar">
+            <div class="app-search">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+              Buscar proyectos, clientes o leads…
+            </div>
+            <div class="app-user">
+              <div class="app-bell"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 9a6 6 0 0 1 12 0c0 4 1.5 5.5 1.5 5.5H4.5S6 13 6 9Z"/><path d="M10 19a2 2 0 0 0 4 0"/></svg><span class="badge">3</span></div>
+              <div class="avatar">VO</div>
+              <span>Valeria · Estudio Meridiano</span>
+            </div>
+          </div>
+
+          <div class="app-body">
+            <div class="kanban-board">
+              <div class="kanban-col">
+                <div class="kanban-col-head">Backlog <span class="count mono">2</span></div>
+                <div class="proj-card">
+                  <b>Campaña de lanzamiento Q4</b>
+                  <span class="client">Andina Coffee Co.</span>
+                  <div class="proj-meta"><span class="tag">Marketing</span><span class="proj-avatar">RT</span></div>
+                </div>
+                <div class="proj-card">
+                  <b>Guía de marca v2</b>
+                  <span class="client">Sal y Menta</span>
+                  <div class="proj-meta"><span class="tag">Diseño</span><span class="proj-avatar">MG</span></div>
+                </div>
+              </div>
+              <div class="kanban-col">
+                <div class="kanban-col-head">En curso <span class="count mono">2</span></div>
+                <div class="proj-card">
+                  <b>Rediseño e-commerce</b>
+                  <span class="client">Rooibos Studio</span>
+                  <div class="progress"><span style="width:62%"></span></div>
+                  <div class="proj-meta"><span class="tag">Dev</span><span class="proj-avatar">JL</span></div>
+                </div>
+                <div class="proj-card">
+                  <b>Rebranding completo</b>
+                  <span class="client">Sal y Menta</span>
+                  <div class="progress"><span style="width:35%"></span></div>
+                  <div class="proj-meta"><span class="tag">Diseño</span><span class="proj-avatar">MG</span></div>
+                </div>
+              </div>
+              <div class="kanban-col">
+                <div class="kanban-col-head">Revisión <span class="count mono">1</span></div>
+                <div class="proj-card">
+                  <b>App móvil de reservas</b>
+                  <span class="client">Vento Fitness</span>
+                  <div class="progress"><span style="width:90%"></span></div>
+                  <div class="proj-meta"><span class="tag">Dev</span><span class="proj-avatar">JL</span></div>
+                </div>
+              </div>
+              <div class="kanban-col">
+                <div class="kanban-col-head">Entregado <span class="count mono">1</span></div>
+                <div class="proj-card">
+                  <b>Landing page SaaS</b>
+                  <span class="client">Nimbus Analytics</span>
+                  <div class="progress"><span style="width:100%"></span></div>
+                  <div class="proj-meta"><span class="tag">Marketing</span><span class="proj-avatar">RT</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="app-side-widgets">
+              <div class="widget">
+                <div class="widget-head"><h4>Pipeline de leads</h4><a href="#">Ver todo</a></div>
+                <div class="funnel-row"><span class="label">Prospección</span><div class="funnel-track"><span style="width:90%"></span></div><span class="count mono">5</span></div>
+                <div class="funnel-row"><span class="label">Contactado</span><div class="funnel-track"><span style="width:60%"></span></div><span class="count mono">3</span></div>
+                <div class="funnel-row"><span class="label">Propuesta</span><div class="funnel-track"><span style="width:40%"></span></div><span class="count mono">2</span></div>
+                <div class="funnel-row"><span class="label">Negociación</span><div class="funnel-track"><span style="width:20%"></span></div><span class="count mono">1</span></div>
+                <div class="lead-highlight">
+                  <div class="top"><b>Constanza Herrera</b><span class="value mono">$2.400</span></div>
+                  <span>Vento Fitness · vía Instagram DM · Propuesta enviada</span>
+                </div>
+              </div>
+              <div class="widget">
+                <div class="widget-head"><h4>Social listening</h4><a href="#">Ver todo</a></div>
+                <div class="signal-row" style="background:transparent;border:none;padding:0;">
+                  <span class="signal-badge ig">IG</span>
+                  <p>Hilo viral en #StartupsLatam sobre malas landing pages</p>
+                </div>
+                <div class="signal-row" style="background:transparent;border:none;padding:0;">
+                  <span class="signal-badge li">LI</span>
+                  <p>Nimbus Analytics busca "agencia de diseño UX"</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section class="section" id="precios">
+    <div class="container">
+      <div class="section-head center">
+        <span class="eyebrow"><span class="dot"></span>Precios</span>
+        <h2>Planes para cada etapa de tu estudio</h2>
+        <p>Empieza solo y crece hacia un equipo completo sin cambiar de herramienta.</p>
+      </div>
+      <div class="pricing-grid">
+        <div class="price-card">
+          <div>
+            <h3>Starter</h3>
+            <span class="who">Para freelancers</span>
+          </div>
+          <div class="price-amount"><span class="num">$19</span><span class="per">/ mes</span></div>
+          <ul class="tile-list">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12l5 5L20 6"/></svg>1 usuario, hasta 8 proyectos activos</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12l5 5L20 6"/></svg>CRM básico y pipeline de leads</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12l5 5L20 6"/></svg>1 red social conectada</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12l5 5L20 6"/></svg>Soporte por email</li>
+          </ul>
+          <a class="btn btn-ghost" href="#" style="margin-top:auto;">Empezar gratis</a>
+        </div>
+        <div class="price-card featured">
+          <span class="price-badge">Más popular</span>
+          <div>
+            <h3>Studio</h3>
+            <span class="who">Para agencias pequeñas</span>
+          </div>
+          <div class="price-amount"><span class="num">$49</span><span class="per">/ mes · hasta 5 personas</span></div>
+          <ul class="tile-list">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12l5 5L20 6"/></svg>Proyectos ilimitados y CRM completo</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12l5 5L20 6"/></svg>Hasta 4 redes sociales + alertas de menciones</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12l5 5L20 6"/></svg>Automatizaciones con IA</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12l5 5L20 6"/></svg>Facturación, contratos e integraciones</li>
+          </ul>
+          <a class="btn btn-primary" href="#" style="margin-top:auto;">Empezar prueba gratis</a>
+        </div>
+        <div class="price-card">
+          <div>
+            <h3>Scale</h3>
+            <span class="who">Para equipos en crecimiento</span>
+          </div>
+          <div class="price-amount"><span class="num">A medida</span></div>
+          <ul class="tile-list">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12l5 5L20 6"/></svg>Usuarios y redes sociales ilimitados</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12l5 5L20 6"/></svg>Lead scoring avanzado y API abierta</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12l5 5L20 6"/></svg>Permisos granulares y auditoría</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12l5 5L20 6"/></svg>Soporte prioritario y onboarding dedicado</li>
+          </ul>
+          <a class="btn btn-ghost" href="#" style="margin-top:auto;">Hablar con ventas</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="section">
+    <div class="container">
+      <div class="final-cta">
+        <h2>Tu próximo cliente ya está hablando de su problema en algún feed.</h2>
+        <p>Empieza a escuchar, organizar y cerrar — gratis durante 14 días, sin tarjeta de crédito.</p>
+        <a class="btn btn-primary" href="#">Crear cuenta gratis</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a class="brand" href="#top">
+          <svg viewBox="0 0 32 32" fill="none"><path d="M4 22C4 22 9 10 16 10C23 10 23 22 28 22" stroke="url(#lg1)" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="28" cy="22" r="2.8" fill="#34E8CE"/></svg>
+          Fluxio
+        </a>
+        <p>Organizador de proyectos con CRM, social listening y captación de leads en un solo flujo de trabajo.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Producto</h5>
+        <ul>
+          <li><a href="#producto">Características</a></li>
+          <li><a href="#producto">CRM</a></li>
+          <li><a href="#producto">Social listening</a></li>
+          <li><a href="#precios">Precios</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Recursos</h5>
+        <ul>
+          <li><a href="#">Centro de ayuda</a></li>
+          <li><a href="#">Guías para agencias</a></li>
+          <li><a href="#">API</a></li>
+          <li><a href="#">Estado del sistema</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Empresa</h5>
+        <ul>
+          <li><a href="#">Sobre Fluxio</a></li>
+          <li><a href="#">Empleo</a></li>
+          <li><a href="#">Contacto</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Legal</h5>
+        <ul>
+          <li><a href="#">Privacidad</a></li>
+          <li><a href="#">Términos</a></li>
+          <li><a href="#">Seguridad</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 Fluxio. Hecho para estudios que no quieren perder ni un lead.</p>
+      <div class="social-badges">
+        <a href="#" aria-label="Instagram">IG</a>
+        <a href="#" aria-label="LinkedIn">LI</a>
+        <a href="#" aria-label="X">X</a>
+        <a href="#" aria-label="TikTok">TT</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const navToggle = document.getElementById('navToggle');
+  const mobileMenu = document.getElementById('mobileMenu');
+  navToggle.addEventListener('click', () => {
+    const isOpen = mobileMenu.classList.toggle('open');
+    navToggle.setAttribute('aria-expanded', String(isOpen));
+  });
+  mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+    mobileMenu.classList.remove('open');
+    navToggle.setAttribute('aria-expanded', 'false');
+  }));
+</script>
