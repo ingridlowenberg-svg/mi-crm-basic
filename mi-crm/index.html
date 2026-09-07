@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fluxio · Panel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0714;
+    --bg-elevated:#15102A;
+    --surface: rgba(255,255,255,.045);
+    --border: rgba(255,255,255,.10);
+    --border-soft: rgba(255,255,255,.06);
+    --text:#F5F3FC;
+    --text-muted:#B3ACCB;
+    --text-faint:#726C8C;
+    --violet:#8B6BFF;
+    --cyan:#34E8CE;
+    --gradient-brand: linear-gradient(90deg, var(--violet), var(--cyan));
+    --font-display:'Bricolage Grotesque', 'Segoe UI', sans-serif;
+    --font-body:'Plus Jakarta Sans', 'Segoe UI', sans-serif;
+    --font-mono:'JetBrains Mono', 'SF Mono', monospace;
+    --radius-lg:24px;
+    --radius-full:999px;
+    --shadow-card: 0 24px 60px -24px rgba(0,0,0,.65);
+    color-scheme: dark;
+  }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--font-body);
+    position:relative;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  body::before{
+    content:"";
+    position:fixed; inset:0; z-index:-1;
+    background:
+      radial-gradient(60vw 60vw at 85% -10%, rgba(139,107,255,.20), transparent 60%),
+      radial-gradient(50vw 50vw at 0% 30%, rgba(52,232,206,.14), transparent 60%),
+      var(--bg);
+  }
+  main{
+    width:min(400px, 90vw);
+    text-align:center;
+    padding:clamp(2rem,6vw,3rem);
+    background:linear-gradient(160deg, rgba(255,255,255,.07), rgba(255,255,255,.02));
+    border:1px solid var(--border);
+    border-radius:var(--radius-lg);
+    backdrop-filter:blur(20px);
+    box-shadow:var(--shadow-card);
+  }
+  .brand{
+    display:inline-flex; align-items:center; gap:.6rem;
+    font-family:var(--font-display); font-weight:700; font-size:1.15rem;
+    margin-bottom:2rem; color:var(--text); text-decoration:none;
+  }
+  .brand svg{ width:28px; height:28px; }
+  h1{
+    font-family:var(--font-display); font-weight:600;
+    font-size:clamp(1.6rem, 4vw, 2.1rem);
+    letter-spacing:-0.01em;
+    margin:0 0 .75rem;
+  }
+  p.sub{
+    color:var(--text-muted);
+    font-size:.95rem;
+    line-height:1.5;
+    margin:0 0 2rem;
+  }
+  button{
+    font-family:inherit;
+    font-size:.95rem;
+    font-weight:600;
+    color:#0A0714;
+    background:var(--gradient-brand);
+    border:none;
+    border-radius:var(--radius-full);
+    padding:.9rem 2rem;
+    cursor:pointer;
+    box-shadow:0 10px 30px -10px rgba(139,107,255,.55);
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  button:hover{
+    transform:translateY(-2px);
+    box-shadow:0 16px 36px -12px rgba(139,107,255,.7);
+  }
+  .back{
+    display:block;
+    margin-top:1.5rem;
+    font-size:.82rem;
+    color:var(--text-faint);
+    text-decoration:none;
+  }
+  .back:hover{ color:var(--text-muted); }
+</style>
+</head>
+<body>
+  <main>
+    <a class="brand" href="../fluxio-landing.html">
+      <svg viewBox="0 0 32 32" fill="none"><defs><linearGradient id="lg1" x1="0" y1="0" x2="32" y2="0"><stop offset="0" stop-color="#8B6BFF"/><stop offset="1" stop-color="#34E8CE"/></linearGradient></defs><path d="M4 22C4 22 9 10 16 10C23 10 23 22 28 22" stroke="url(#lg1)" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="28" cy="22" r="2.8" fill="url(#lg1)"/></svg>
+      Fluxio
+    </a>
+    <h1>Bienvenido a tu panel</h1>
+    <p class="sub">Tus proyectos, tu CRM y tus señales sociales en un mismo lugar. Entra para retomar donde lo dejaste.</p>
+    <button type="button">Comenzar</button>
+    <a class="back" href="../fluxio-landing.html">&larr; Volver al inicio</a>
+  </main>
+</body>
+</html>
